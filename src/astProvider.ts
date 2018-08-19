@@ -20,29 +20,37 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
 
     private tree: Node | undefined;
     private editor: vscode.TextEditor | undefined;
+    private timeoutHandler: NodeJS.Timer | undefined;
 
     constructor() {
         vscode.window.onDidChangeActiveTextEditor(editor => {
-            this.parseTree();
+            this.parseTree(editor);
+        });
+        vscode.window.onDidChangeTextEditorSelection(e => {
+            this.parseTree(e.textEditor);
         });
 
-        this.parseTree();
+        this.parseTree(vscode.window.activeTextEditor);
     }
 
-    private parseTree(): void {
+    private parseTree(editor: vscode.TextEditor | undefined): void {
         this.tree = undefined;
         this.editor = undefined;
-        const editor = vscode.window.activeTextEditor;
         if (editor && editor.document && editor.document.languageId === 'go') {
-            const result = createNodeFromActiveEditor();
-            if (result === undefined) {
-                return;
+            if (this.timeoutHandler !== undefined) {
+                clearTimeout(this.timeoutHandler);
             }
-            result.node.then((node) => {
-                this.tree = node;
-                this.editor = result.editor;
-                this._onDidChangeTreeData.fire();
-            });
+            this.timeoutHandler = setTimeout(() => {
+                const result = createNodeFromActiveEditor();
+                if (result === undefined) {
+                    return;
+                }
+                result.node.then((node) => {
+                    this.tree = node;
+                    this.editor = result.editor;
+                    this._onDidChangeTreeData.fire();
+                });
+            }, 2000);
         }
     }
 
@@ -55,7 +63,7 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
             it.command = {
                 command: OPEN_SELECTION_COMMAND_ID,
                 title: '',
-                arguments: [new vscode.Range(this.editor.document.positionAt(element.pos - 1), this.editor.document.positionAt(element.end))]
+                arguments: [new vscode.Range(this.editor.document.positionAt(element.pos - 1), this.editor.document.positionAt(element.end - 1))]
             };
         }
         return it;
