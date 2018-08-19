@@ -24,16 +24,16 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
 
     constructor() {
         vscode.window.onDidChangeActiveTextEditor(editor => {
-            this.parseTree(editor);
+            this.parseTree(editor, true);
         });
         vscode.window.onDidChangeTextEditorSelection(e => {
-            this.parseTree(e.textEditor);
+            this.parseTree(e.textEditor, false);
         });
 
-        this.parseTree(vscode.window.activeTextEditor);
+        this.parseTree(vscode.window.activeTextEditor, true);
     }
 
-    private parseTree(editor: vscode.TextEditor | undefined): void {
+    private parseTree(editor: vscode.TextEditor | undefined, force: boolean): void {
         this.tree = undefined;
         this.editor = undefined;
         if (editor && editor.document && editor.document.languageId === 'go') {
@@ -50,7 +50,7 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
                     this.editor = result.editor;
                     this._onDidChangeTreeData.fire();
                 });
-            }, 2000);
+            }, force ? 0 : 2000);
         }
     }
 
