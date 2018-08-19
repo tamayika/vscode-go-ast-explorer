@@ -2,7 +2,7 @@
 
 Go AST Explorer adds ast treeview to VSCode explorer.
 
-![preview](https://github.com/tamayika/vscode-go-ast-explorer/blob/master/image/dev.png)
+![preview](https://github.com/tamayika/vscode-go-ast-explorer/raw/master/image/dev.png)
 
 ## License
 
