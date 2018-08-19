@@ -3,7 +3,7 @@
     "displayName": "go-ast-explorer",
     "description": "Go AST Explorer",
     "version": "0.0.1",
-    "publisher": "test",
+    "publisher": "tamayika",
     "engines": {
         "vscode": "^1.26.0"
     },
