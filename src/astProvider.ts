@@ -3,14 +3,11 @@ import * as vscode from 'vscode';
 import { getAst } from './goAst';
 import { OPEN_SELECTION_COMMAND_ID } from './commands';
 
-export function createNodeFromActiveEditor(): { editor: vscode.TextEditor, node: Promise<Node> } | undefined {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-        return undefined;
+export function createNodeFromDocument(document: vscode.TextDocument | undefined): Promise<Node | undefined> {
+    if (!document) {
+        return Promise.resolve<Node | undefined>(undefined);
     }
-    const doc = editor.document;
-    const node = getAst(doc, undefined);
-    return { editor, node };
+    return getAst(document, undefined);
 }
 
 export class AstProvider implements vscode.TreeDataProvider<Node> {
@@ -19,38 +16,71 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
     readonly onDidChangeTreeData: vscode.Event<Node | null> = this._onDidChangeTreeData.event;
 
     private tree: Node | undefined;
-    private editor: vscode.TextEditor | undefined;
+    private document: vscode.TextDocument | undefined;
     private timeoutHandler: NodeJS.Timer | undefined;
+    private selectHandler: vscode.Disposable | undefined;
+
+    public treeView: vscode.TreeView<Node> | undefined;
 
     constructor() {
         vscode.window.onDidChangeActiveTextEditor(editor => {
-            this.parseTree(editor, true);
+            this.tree = undefined;
+            if (editor) {
+                this.parseTree(editor.document, true);
+            }
         });
-        vscode.window.onDidChangeTextEditorSelection(e => {
-            this.parseTree(e.textEditor, false);
+        vscode.workspace.onDidChangeTextDocument(e => {
+            this.parseTree(e.document, false);
         });
 
-        this.parseTree(vscode.window.activeTextEditor, true);
+        this.listenConfigurationChange();
+
+        if (vscode.window.activeTextEditor) {
+            this.parseTree(vscode.window.activeTextEditor.document, true);
+        }
     }
 
-    private parseTree(editor: vscode.TextEditor | undefined, force: boolean): void {
-        this.tree = undefined;
-        this.editor = undefined;
-        if (editor && editor.document && editor.document.languageId === 'go') {
+    listenConfigurationChange() {
+        if (this.selectHandler) {
+            this.selectHandler.dispose();
+            this.selectHandler = undefined;
+        }
+
+        const config = vscode.workspace.getConfiguration("go-ast").get<boolean>("selectOnMove");
+        if (config) {
+            this.selectHandler = vscode.window.onDidChangeTextEditorSelection(e => {
+                this.show();
+            });
+        }
+    }
+
+    private parseTree(document: vscode.TextDocument | undefined, force: boolean) {
+        if (document && document.languageId === 'go') {
             if (this.timeoutHandler !== undefined) {
                 clearTimeout(this.timeoutHandler);
             }
             this.timeoutHandler = setTimeout(() => {
-                const result = createNodeFromActiveEditor();
+                const result = createNodeFromDocument(document);
                 if (result === undefined) {
                     return;
                 }
-                result.node.then((node) => {
+                result.then((node) => {
+                    if (!node) {
+                        return;
+                    }
+                    this.setParent(node);
                     this.tree = node;
-                    this.editor = result.editor;
+                    this.document = document;
                     this._onDidChangeTreeData.fire();
                 });
             }, force ? 0 : 2000);
+        }
+    }
+
+    private setParent(node: Node) {
+        for (const child of node.children) {
+            child.parent = node;
+            this.setParent(child);
         }
     }
 
@@ -58,12 +88,12 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
         const children = this.getChildren(element) as Node[];
         const hasChildren = children && children.length > 0;
         const it = new vscode.TreeItem(`${element.type} (${element.pos}, ${element.end})`,
-            hasChildren ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
-        if (this.editor) {
+            hasChildren ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
+        if (this.document) {
             it.command = {
                 command: OPEN_SELECTION_COMMAND_ID,
                 title: '',
-                arguments: [new vscode.Range(this.editor.document.positionAt(element.pos - 1), this.editor.document.positionAt(element.end - 1))]
+                arguments: [new vscode.Range(this.document.positionAt(element.pos - 1), this.document.positionAt(element.end - 1))]
             };
         }
         return it;
@@ -74,10 +104,37 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
         return children.length === 0 ? undefined : children;
     }
 
+    getParent(element: Node): Node | undefined {
+        return element.parent;
+    }
+
     select(range: vscode.Range) {
-        if (this.editor) {
-            this.editor.selection = new vscode.Selection(range.start, range.end);
-            this.editor.revealRange(range);
+        if (vscode.window.activeTextEditor) {
+            vscode.window.activeTextEditor.selection = new vscode.Selection(range.start, range.end);
+            vscode.window.activeTextEditor.revealRange(range);
         }
+    }
+
+    show() {
+        if (vscode.window.activeTextEditor && this.tree && this.treeView) {
+            const node = this.findNearest(vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start) + 1, this.tree);
+            if (!node) {
+                return;
+            }
+            this.treeView.reveal(node);
+        }
+    }
+
+    private findNearest(pos: number, parent: Node): Node | undefined {
+        if (parent.pos <= pos && pos <= parent.end) {
+            for (const child of parent.children) {
+                const foundChild = this.findNearest(pos, child);
+                if (foundChild) {
+                    return foundChild;
+                }
+            }
+            return parent;
+        }
+        return undefined;
     }
 }

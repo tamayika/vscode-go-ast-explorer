@@ -3,4 +3,5 @@ type Node = {
     pos: number,
     end: number,
     children: Node[],
+    parent: Node | undefined,
 };

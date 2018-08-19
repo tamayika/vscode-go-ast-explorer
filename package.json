@@ -33,8 +33,33 @@
                 "command": "go-ast-explorer.installTools",
                 "title": "Go AST: Install/Update Tools",
                 "description": "install/update the required go packages"
+            },
+            {
+                "command": "go-ast-explorer.showInExplorer",
+                "title": "Go AST: Show In Explorer",
+                "description": "Show nearest ast node for current cursor"
             }
-        ]
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "when": "resourceLangId == go",
+                    "command": "go-ast-explorer.showInExplorer"
+                }
+            ]
+        },
+        "configuration": {
+            "type": "object",
+            "title": "Go AST configuration",
+            "properties": {
+                "go-ast.selectOnMove": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Select matched ast node when cursor moved",
+                    "scope": "resource"
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
