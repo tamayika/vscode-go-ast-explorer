@@ -156,8 +156,8 @@ function installTools(missing: string[]) {
 
     outputChannel.appendLine(''); // Blank line for spacing.
 
-    missing.reduce((res: Promise<string[]>, tool: string) => {
-        return res.then(sofar => new Promise<string[]>((resolve, reject) => {
+    missing.reduce((res: Promise<(string | undefined)[]>, tool: string) => {
+        return res.then(sofar => new Promise<(string | undefined)[]>((resolve, reject) => {
             const callback = (err: Error | null, stdout: string, stderr: string) => {
                 if (err) {
                     outputChannel.appendLine('Installing ' + allTools[tool] + ' FAILED');
@@ -165,7 +165,7 @@ function installTools(missing: string[]) {
                     resolve([...sofar, failureReason]);
                 } else {
                     outputChannel.appendLine('Installing ' + allTools[tool] + ' SUCCEEDED');
-                    resolve([...sofar, ""]);
+                    resolve([...sofar, undefined]);
                 }
             };
 
@@ -187,9 +187,9 @@ function installTools(missing: string[]) {
             });
 
         }));
-    }, Promise.resolve([])).then(res => {
+    }, Promise.resolve([])).then((res: (string | undefined)[]) => {
         outputChannel.appendLine(''); // Blank line for spacing
-        let failures = res.filter(x => x !== null && x !== undefined);
+        let failures = <string[]>res.filter(x => x !== null && x !== undefined);
         if (failures.length === 0) {
             if (missing.indexOf('go-langserver') > -1) {
                 outputChannel.appendLine('Reload VS Code window to use the Go language server');
