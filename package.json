@@ -1,0 +1,49 @@
+{
+    "name": "go-ast-explorer",
+    "displayName": "go-ast-explorer",
+    "description": "Go AST Explorer",
+    "version": "0.0.1",
+    "publisher": "test",
+    "engines": {
+        "vscode": "^1.26.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onLanguage:go",
+        "onCommand:go-ast-explorer.installTools"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "views": {
+            "explorer": [
+                {
+                    "id": "go-ast-explorer.view",
+                    "name": "Go AST"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "go-ast-explorer.installTools",
+                "title": "Go AST: Install/Update Tools",
+                "description": "install/update the required go packages"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21",
+        "tslint": "^5.8.0",
+        "@types/node": "^8.10.25",
+        "@types/mocha": "^2.2.42"
+    }
+}
