@@ -4,6 +4,10 @@
     "description": "Go AST Explorer",
     "version": "0.0.1",
     "publisher": "tamayika",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tamayika/vscode-go-ast-explorer"
+    },
     "engines": {
         "vscode": "^1.26.0"
     },
