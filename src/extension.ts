@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
     astProvider.treeView = vscode.window.createTreeView('go-ast-explorer.view', { treeDataProvider: astProvider });
     context.subscriptions.push(astProvider.treeView);
     context.subscriptions.push(vscode.window.registerTreeDataProvider('go-ast-explorer.view', astProvider));
-    context.subscriptions.push(vscode.commands.registerCommand(OPEN_SELECTION_COMMAND_ID, range => astProvider.select(range)));
+    context.subscriptions.push(vscode.commands.registerCommand(OPEN_SELECTION_COMMAND_ID, range => astProvider.select(range())));
     context.subscriptions.push(vscode.commands.registerCommand(INSTALL_TOOLS_COMMAND_ID, () => {
         installAllTools();
     }));

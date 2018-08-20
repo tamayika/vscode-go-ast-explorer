@@ -46,7 +46,7 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
             this.selectHandler = undefined;
         }
 
-        const config = vscode.workspace.getConfiguration("go-ast").get<boolean>("selectOnMove");
+        const config = vscode.workspace.getConfiguration("go-ast", null).get<boolean>("selectOnMove");
         if (config) {
             this.selectHandler = vscode.window.onDidChangeTextEditorSelection(e => {
                 this.show();
@@ -90,13 +90,37 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
         const it = new vscode.TreeItem(`${element.type} (${element.pos}, ${element.end})`,
             hasChildren ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
         if (this.document) {
+            const document = this.document;
             it.command = {
                 command: OPEN_SELECTION_COMMAND_ID,
                 title: '',
-                arguments: [new vscode.Range(this.document.positionAt(element.pos - 1), this.document.positionAt(element.end - 1))]
+                arguments: [() => {
+                    return new vscode.Range(this.offsetToPosition(document, element.pos - 1), this.offsetToPosition(document, element.end - 1));
+                }]
             };
         }
         return it;
+    }
+
+    private offsetToPosition(document: vscode.TextDocument, offset: number): vscode.Position {
+        const allText = document.getText();
+        let start = 0;
+        let end = allText.length;
+        while (end - start >= 1) {
+            const next = parseInt(((end + start) / 2).toString());
+            const subText = allText.substr(0, next);
+            const byteLentgh = Buffer.byteLength(subText);
+            if (byteLentgh === offset) {
+                start = end = next;
+                break;
+            }
+            if (byteLentgh < offset) {
+                start = next;
+            } else {
+                end = next;
+            }
+        }
+        return document.positionAt(start);
     }
 
     getChildren(element?: Node): vscode.ProviderResult<Node[]> {
@@ -117,7 +141,9 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
 
     show() {
         if (vscode.window.activeTextEditor && this.tree && this.treeView) {
-            const node = this.findNearest(vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start) + 1, this.tree);
+            const range = new vscode.Range(new vscode.Position(0, 0), vscode.window.activeTextEditor.selection.active);
+            const offset = Buffer.byteLength(vscode.window.activeTextEditor.document.getText(range)) + 1;
+            const node = this.findNearest(offset, this.tree);
             if (!node) {
                 return;
             }
