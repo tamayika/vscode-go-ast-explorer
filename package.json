@@ -2,7 +2,7 @@
     "name": "go-ast-explorer",
     "displayName": "go-ast-explorer",
     "description": "Go AST Explorer",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "publisher": "tamayika",
     "repository": {
         "type": "git",
