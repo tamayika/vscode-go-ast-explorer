@@ -30,7 +30,6 @@ export function getAst(document: vscode.TextDocument, token: vscode.Cancellation
                     let errMsg = stderr ? 'go-ast failed: ' + stderr.replace(/\n/g, ' ') : 'go-ast failed';
                     console.log(errMsg);
                     outputChannel.appendLine(errMsg);
-                    outputChannel.show(true);
                     return reject();
                 }
 
