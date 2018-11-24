@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import { getAst } from './goAst';
 import { OPEN_SELECTION_COMMAND_ID } from './commands';
+import { offsetToPosition } from './util';
 
 export function createNodeFromDocument(document: vscode.TextDocument | undefined): Promise<Node | undefined> {
     if (!document) {
@@ -95,32 +96,11 @@ export class AstProvider implements vscode.TreeDataProvider<Node> {
                 command: OPEN_SELECTION_COMMAND_ID,
                 title: '',
                 arguments: [() => {
-                    return new vscode.Range(this.offsetToPosition(document, element.pos - 1), this.offsetToPosition(document, element.end - 1));
+                    return new vscode.Range(offsetToPosition(document, element.pos - 1), offsetToPosition(document, element.end - 1));
                 }]
             };
         }
         return it;
-    }
-
-    private offsetToPosition(document: vscode.TextDocument, offset: number): vscode.Position {
-        const allText = document.getText();
-        let start = 0;
-        let end = allText.length;
-        while (end - start >= 1) {
-            const next = parseInt(((end + start) / 2).toString());
-            const subText = allText.substr(0, next);
-            const byteLentgh = Buffer.byteLength(subText);
-            if (byteLentgh === offset) {
-                start = end = next;
-                break;
-            }
-            if (byteLentgh < offset) {
-                start = next;
-            } else {
-                end = next;
-            }
-        }
-        return document.positionAt(start);
     }
 
     getChildren(element?: Node): vscode.ProviderResult<Node[]> {

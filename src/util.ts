@@ -221,3 +221,24 @@ export function killProcess(p: cp.ChildProcess) {
         }
     }
 }
+
+export function offsetToPosition(document: vscode.TextDocument, offset: number): vscode.Position {
+    const allText = document.getText();
+    let start = 0;
+    let end = allText.length;
+    while (end - start >= 1) {
+        const next = parseInt(((end + start) / 2).toString());
+        const subText = allText.substr(0, next);
+        const byteLentgh = Buffer.byteLength(subText);
+        if (byteLentgh === offset) {
+            start = end = next;
+            break;
+        }
+        if (byteLentgh < offset) {
+            start = next;
+        } else {
+            end = next;
+        }
+    }
+    return document.positionAt(start);
+}

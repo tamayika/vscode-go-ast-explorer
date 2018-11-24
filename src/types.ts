@@ -5,3 +5,8 @@ type Node = {
     children: Node[],
     parent: Node | undefined,
 };
+
+type NodeSpan = {
+    pos: number,
+    end: number,
+};

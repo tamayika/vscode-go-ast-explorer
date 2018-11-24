@@ -38,6 +38,11 @@
                 "command": "go-ast-explorer.showInExplorer",
                 "title": "Go AST: Show In Explorer",
                 "description": "Show nearest ast node for current cursor"
+            },
+            {
+                "command": "go-ast-explorer.selectByGAQ",
+                "title": "Go AST: Select Node Text By GAQ",
+                "description": "Select node texts by GAQ"
             }
         ],
         "menus": {

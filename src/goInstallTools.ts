@@ -16,16 +16,19 @@ let updatesDeclinedTools: string[] = [];
 let installsDeclinedTools: string[] = [];
 const allTools: { [key: string]: string } = {
     "go-ast": "github.com/tamayika/go-ast",
+    "gaq": "github.com/tamayika/gaq",
 };
 
 // Tools used explicitly by the basic features of the extension
 const importantTools = [
     'go-ast',
+    'gaq',
 ];
 
 function getTools(goVersion: SemVersion | undefined): string[] {
     let tools: string[] = [
         'go-ast',
+        'gaq',
     ];
 
     return tools;
@@ -33,7 +36,8 @@ function getTools(goVersion: SemVersion | undefined): string[] {
 
 export function installAllTools() {
     const allToolsDescription: { [key: string]: string } = {
-        'go-ast': '\t\t(AST dumper)'
+        'go-ast': '\t\t(AST dumper)',
+        'gaq': '\t\t(AST Query)',
     };
 
     getGoVersion().then((goVersion) => {
@@ -146,6 +150,8 @@ function installTools(missing: string[]) {
         });
         return;
     }
+
+    envForTools['GO111MODULE'] = 'off';
 
     outputChannel.show();
     outputChannel.clear();
