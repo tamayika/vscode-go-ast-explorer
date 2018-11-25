@@ -10,6 +10,14 @@ Go AST Explorer adds ast treeview to VSCode explorer.
 | ------------------- | ------- | ------- | ----------------------------------------- |
 | go-ast.selectOnMove | boolean | false   | Select matched ast node when cursor moved |
 
+## Command
+
+|               name               |                                           description                                           |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Go AST: Select Nodes Text By GAQ | Select nodes text which matches input gaq query.                                                |
+| Go AST: Search Nodes Text By GAQ | Highlight nodes text which matches input gaq query.<br> After editing text, highlight will be cleared. |
+
+
 ## License
 
 See [LICENSE](https://github.com/tamayika/vscode-go-ast-explorer/blob/master/LICENSE)
