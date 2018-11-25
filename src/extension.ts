@@ -3,7 +3,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {
-    OPEN_SELECTION_COMMAND_ID, INSTALL_TOOLS_COMMAND_ID, SHOW_IN_EXPLORER_COMMAND_ID, SELECT_BY_GAQ_COMMAND_ID
+    OPEN_SELECTION_COMMAND_ID, INSTALL_TOOLS_COMMAND_ID, SHOW_IN_EXPLORER_COMMAND_ID,
+    SELECT_BY_GAQ_COMMAND_ID, SEARCH_BY_GAQ_COMMAND_ID
 } from './commands';
 import { AstProvider } from './astProvider';
 import { installAllTools } from './goInstallTools';
@@ -26,6 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
     }));
     context.subscriptions.push(vscode.commands.registerCommand(SELECT_BY_GAQ_COMMAND_ID, () => {
         gaqProvider.selectByQuery();
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand(SEARCH_BY_GAQ_COMMAND_ID, () => {
+        gaqProvider.searchByQuery();
     }));
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
         if (!e.affectsConfiguration("go-ast")) {

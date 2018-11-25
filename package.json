@@ -41,8 +41,13 @@
             },
             {
                 "command": "go-ast-explorer.selectByGAQ",
-                "title": "Go AST: Select Node Text By GAQ",
-                "description": "Select node texts by GAQ"
+                "title": "Go AST: Select Nodes Text By GAQ",
+                "description": "Select nodes text by GAQ"
+            },
+            {
+                "command": "go-ast-explorer.searchByGAQ",
+                "title": "Go AST: Search Nodes Text By GAQ",
+                "description": "Search nodes text by GAQ"
             }
         ],
         "menus": {
